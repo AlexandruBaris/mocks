@@ -5,14 +5,18 @@ import com.endava.internship.mocking.model.Status;
 import com.endava.internship.mocking.model.User;
 import com.endava.internship.mocking.repository.PaymentRepository;
 import com.endava.internship.mocking.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 
@@ -24,6 +28,9 @@ class PaymentServiceTest {
     private UserRepository userRepository;
     private PaymentRepository paymentRepository;
     private ValidationService validationService;
+
+    @Captor
+    ArgumentCaptor<Payment> paymentArgumentCaptor;
 
 
     @BeforeEach
@@ -47,9 +54,25 @@ class PaymentServiceTest {
         verify(validationService).validateUserId(any());
         verify(validationService).validateAmount(anyDouble());
         verify(validationService).validateUser(any());
+        verify(userRepository).findById(anyInt());
+
+        paymentArgumentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).save(paymentArgumentCaptor.capture());
+
+        Payment payment = paymentArgumentCaptor.getValue();
+
+        assertThat(user.getId()).isEqualTo(payment.getUserId());
+        assertThat(payment.getMessage()).isEqualTo("Payment from user " + user.getName());
+        assertThat(payment.getAmount()).isEqualTo(200);
 
     }
 
+    @Test
+    void createPaymentThrowExceptionIfUserIsNotFound(){
+        when(userRepository.findById(1)).thenThrow(new NoSuchElementException());
+        Assertions.assertThrows(NoSuchElementException.class,()->service.createPayment(1,200.00));
+
+    }
     @Test
     void editMessage() {
         Payment payment = new Payment(1,200.00,"");
