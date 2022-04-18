@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.*;
 
@@ -39,8 +38,6 @@ class PaymentServiceTest {
         paymentRepository = mock(PaymentRepository.class);
         validationService = mock(ValidationService.class);
         service = new PaymentService(userRepository,paymentRepository,validationService);
-
-
 
     }
 
@@ -68,11 +65,34 @@ class PaymentServiceTest {
     }
 
     @Test
+    void test(){
+        User user = new User(1,"User",Status.ACTIVE);
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        service.createPayment(user.getId(),200.00);
+        paymentArgumentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository).save(paymentArgumentCaptor.capture());
+        Payment actualPayment = paymentArgumentCaptor.getValue();
+        Payment expectedPayment = new Payment(1,200.00,"Payment from user " + user.getName());
+
+        assertThat(actualPayment.getAmount()).isEqualTo(expectedPayment.getAmount());
+        assertThat(actualPayment.getUserId()).isEqualTo(expectedPayment.getUserId());
+        assertThat(actualPayment.getMessage()).isEqualTo(expectedPayment.getMessage());
+    }
+
+    @Test
     void createPaymentThrowExceptionIfUserIsNotFound(){
         when(userRepository.findById(1)).thenThrow(new NoSuchElementException());
         Assertions.assertThrows(NoSuchElementException.class,()->service.createPayment(1,200.00));
 
     }
+
+    @Test
+    void comparingActualPaymentWithExpected(){
+        Optional<User> optional = userRepository.findById(1);
+        User user = optional.get();
+        service.createPayment(user.getId(),200.00);
+    }
+
     @Test
     void editMessage() {
         Payment payment = new Payment(1,200.00,"");

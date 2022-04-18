@@ -32,6 +32,10 @@ class InMemPaymentRepositoryTest {
     void findById() {
         assertThat(paymentRepository.findById(uuid)).isPresent();
         assertThat(paymentRepository.findById(uuid)).isEqualTo(optional);
+    }
+
+    @Test
+    void checkFindByIdWithNullThrowException(){
         Assertions.assertThrows(IllegalArgumentException.class, ()-> paymentRepository.findById(null));
     }
 
@@ -46,7 +50,17 @@ class InMemPaymentRepositoryTest {
     void save() {
         Payment payment1 = new Payment(2,300.00,"Txn");
         assertThat(paymentRepository.save(payment1)).isEqualTo(payment1);
+    }
+
+    @Test
+    void saveNullPaymentThrowException(){
         Assertions.assertThrows(IllegalArgumentException.class, ()->paymentRepository.save(null));
+    }
+
+    @Test
+    void saveAlreadyExistingPaymentThrowException(){
+        Payment payment1 = new Payment(2,300.00,"Txn");
+        paymentRepository.save(payment1);
         Assertions.assertThrows(IllegalArgumentException.class, ()->paymentRepository.save(payment1));
     }
 
@@ -55,7 +69,10 @@ class InMemPaymentRepositoryTest {
         UUID id = payment.getPaymentId();
         Payment payment1 = payment;
         assertThat(paymentRepository.editMessage(id,"Message")).isEqualTo(payment1);
+    }
 
+    @Test
+    void editMessagePassingNullThrowException(){
         Assertions.assertThrows(NoSuchElementException.class,()-> paymentRepository.editMessage(null,null));
     }
 }
