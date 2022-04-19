@@ -17,7 +17,7 @@ class InMemPaymentRepositoryTest {
     private InMemPaymentRepository paymentRepository;
     private Payment payment;
     private UUID uuid;
-    private Optional<Payment> optional;
+
 
     @BeforeEach
     void setup(){
@@ -25,11 +25,12 @@ class InMemPaymentRepositoryTest {
         payment = new Payment(1,200.00,"TXN");
         uuid = payment.getPaymentId();
         paymentRepository.save(payment);
-        optional = Optional.of(payment);
+
     }
 
     @Test
     void findById() {
+        Optional<Payment> optional = Optional.of(payment);
         assertThat(paymentRepository.findById(uuid)).isPresent();
         assertThat(paymentRepository.findById(uuid)).isEqualTo(optional);
     }

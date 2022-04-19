@@ -65,18 +65,18 @@ class PaymentServiceTest {
     }
 
     @Test
-    void test(){
+    void comparingExpectedAndActualPayment(){
+        Payment actual = new Payment(1,200.00,"User");
         User user = new User(1,"User",Status.ACTIVE);
+
         when(userRepository.findById(1)).thenReturn(Optional.of(user));
-        service.createPayment(user.getId(),200.00);
+
+        when(paymentRepository.save(any())).thenReturn(actual);
+        Payment expected = service.createPayment(user.getId(),200.00);
         paymentArgumentCaptor = ArgumentCaptor.forClass(Payment.class);
         verify(paymentRepository).save(paymentArgumentCaptor.capture());
-        Payment actualPayment = paymentArgumentCaptor.getValue();
-        Payment expectedPayment = new Payment(1,200.00,"Payment from user " + user.getName());
 
-        assertThat(actualPayment.getAmount()).isEqualTo(expectedPayment.getAmount());
-        assertThat(actualPayment.getUserId()).isEqualTo(expectedPayment.getUserId());
-        assertThat(actualPayment.getMessage()).isEqualTo(expectedPayment.getMessage());
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -84,13 +84,6 @@ class PaymentServiceTest {
         when(userRepository.findById(1)).thenThrow(new NoSuchElementException());
         Assertions.assertThrows(NoSuchElementException.class,()->service.createPayment(1,200.00));
 
-    }
-
-    @Test
-    void comparingActualPaymentWithExpected(){
-        Optional<User> optional = userRepository.findById(1);
-        User user = optional.get();
-        service.createPayment(user.getId(),200.00);
     }
 
     @Test
@@ -102,6 +95,10 @@ class PaymentServiceTest {
         verify(validationService).validatePaymentId(payment.getPaymentId());
         verify(paymentRepository).editMessage(payment.getPaymentId(),"Message");
 
+        when(paymentRepository.editMessage(any(),anyString())).thenReturn(payment);
+        Payment expected = paymentRepository.editMessage(payment.getPaymentId(),payment.getMessage());
+
+        assertThat(payment).isEqualTo(expected);
     }
 
     @Test
