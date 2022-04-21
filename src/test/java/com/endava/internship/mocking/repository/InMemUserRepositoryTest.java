@@ -3,7 +3,6 @@ package com.endava.internship.mocking.repository;
 import com.endava.internship.mocking.model.Status;
 import com.endava.internship.mocking.model.User;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;

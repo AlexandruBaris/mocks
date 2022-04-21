@@ -14,16 +14,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class InMemPaymentRepositoryTest {
 
-    private InMemPaymentRepository paymentRepository;
-    private Payment payment;
-    private UUID uuid;
-
+    private final InMemPaymentRepository paymentRepository = new InMemPaymentRepository();
+    private final Payment payment = new Payment(1,200.00,"TXN");
+    private final UUID uuid = payment.getPaymentId();
 
     @BeforeEach
     void setup(){
-        paymentRepository = new InMemPaymentRepository();
-        payment = new Payment(1,200.00,"TXN");
-        uuid = payment.getPaymentId();
         paymentRepository.save(payment);
 
     }

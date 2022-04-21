@@ -1,10 +1,8 @@
 package com.endava.internship.mocking.service;
 
-import com.endava.internship.mocking.model.Payment;
 import com.endava.internship.mocking.model.Status;
 import com.endava.internship.mocking.model.User;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
