@@ -47,26 +47,17 @@ class PaymentServiceTest {
         User user = new User(1,"User",Status.ACTIVE);
 
         when(userRepository.findById(1)).thenReturn(Optional.of(user));
-        service.createPayment(user.getId(),200.00);
+        when(paymentRepository.save(any())).thenReturn(actual);
+        Payment expected = service.createPayment(user.getId(),200.00);
 
         verify(validationService).validateUserId(any());
         verify(validationService).validateAmount(anyDouble());
         verify(validationService).validateUser(any());
         verify(userRepository).findById(anyInt());
 
-        paymentArgumentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository).save(paymentArgumentCaptor.capture());
-
-        Payment payment = paymentArgumentCaptor.getValue();
-
-        assertThat(user.getId()).isEqualTo(payment.getUserId());
-        assertThat(payment.getMessage()).isEqualTo("Payment from user " + user.getName());
-        assertThat(payment.getAmount()).isEqualTo(200);
-
-
-        when(paymentRepository.save(any())).thenReturn(actual);
-        Payment expected = service.createPayment(user.getId(),200.00);
-        assertThat(actual).isEqualTo(expected);
+        assertThat(expected.getMessage()).isEqualTo(actual.getMessage());
+        assertThat(expected.getUserId()).isEqualTo(actual.getUserId());
+        assertThat(expected.getAmount()).isEqualTo(actual.getAmount());
 
     }
 
@@ -98,7 +89,6 @@ class PaymentServiceTest {
         Payment newPaymentMessage = Payment.copyOf(payment);
         newPaymentMessage.setMessage("Message");
 
-
         when(paymentRepository.editMessage(any(),anyString())).thenReturn(newPaymentMessage);
 
         Payment expected = service.editPaymentMessage(payment.getPaymentId(),"Message");
@@ -107,20 +97,27 @@ class PaymentServiceTest {
         verify(validationService).validatePaymentId(payment.getPaymentId());
         verify(paymentRepository).editMessage(payment.getPaymentId(),"Message");
 
-
-        assertThat(expected.getMessage()).isEqualTo("Message");
         assertThat(expected).isEqualTo(newPaymentMessage);
-
-
     }
 
     @Test
     void getAllByAmountExceeding() {
-        List<Payment> payments = new ArrayList<>();
-        payments.add(new Payment(1,200.00,""));
+        Payment p1 = new Payment(1,200.00,"");
+        Payment p2 = new Payment(1,200.00,"");
+        Payment p3 = new Payment(3,50.00,"");
+        Payment p4 = new Payment(1,100.00,"");
+        List<Payment> list = new ArrayList<>();
+        list.add(p1);
+        list.add(p2);
+        list.add(p3);
+        list.add(p4);
 
-        when(paymentRepository.findAll()).thenReturn(payments);
-        assertThat(service.getAllByAmountExceeding(100.00)).isEqualTo(payments);
+        List<Payment> expected = new ArrayList<>();
+        expected.add(p1);
+        expected.add(p2);
 
+        when(paymentRepository.findAll()).thenReturn(list);
+
+        assertThat(service.getAllByAmountExceeding(100.00)).isEqualTo(expected);
     }
 }
