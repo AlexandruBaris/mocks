@@ -13,12 +13,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class InMemUserRepositoryTest {
 
-    private InMemUserRepository userRepository;
-
-    @BeforeEach
-    void setUp(){
-        userRepository =  new InMemUserRepository();
-    }
+    private final InMemUserRepository userRepository = new InMemUserRepository();
 
     @Test
     void findById() {

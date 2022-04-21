@@ -43,6 +43,7 @@ class PaymentServiceTest {
 
     @Test
     void createPayment() {
+        Payment actual = new Payment(1,200.00,"User");
         User user = new User(1,"User",Status.ACTIVE);
 
         when(userRepository.findById(1)).thenReturn(Optional.of(user));
@@ -61,6 +62,11 @@ class PaymentServiceTest {
         assertThat(user.getId()).isEqualTo(payment.getUserId());
         assertThat(payment.getMessage()).isEqualTo("Payment from user " + user.getName());
         assertThat(payment.getAmount()).isEqualTo(200);
+
+
+        when(paymentRepository.save(any())).thenReturn(actual);
+        Payment expected = service.createPayment(user.getId(),200.00);
+        assertThat(actual).isEqualTo(expected);
 
     }
 
@@ -89,16 +95,23 @@ class PaymentServiceTest {
     @Test
     void editMessage() {
         Payment payment = new Payment(1,200.00,"");
+        Payment newPaymentMessage = Payment.copyOf(payment);
+        newPaymentMessage.setMessage("Message");
 
-        service.editPaymentMessage(payment.getPaymentId(),"Message");
+
+        when(paymentRepository.editMessage(any(),anyString())).thenReturn(newPaymentMessage);
+
+        Payment expected = service.editPaymentMessage(payment.getPaymentId(),"Message");
+
         verify(validationService).validateMessage(anyString());
         verify(validationService).validatePaymentId(payment.getPaymentId());
         verify(paymentRepository).editMessage(payment.getPaymentId(),"Message");
 
-        when(paymentRepository.editMessage(any(),anyString())).thenReturn(payment);
-        Payment expected = paymentRepository.editMessage(payment.getPaymentId(),payment.getMessage());
 
-        assertThat(payment).isEqualTo(expected);
+        assertThat(expected.getMessage()).isEqualTo("Message");
+        assertThat(expected).isEqualTo(newPaymentMessage);
+
+
     }
 
     @Test
